@@ -1,8 +1,8 @@
 import  { useState, useEffect } from 'react';
-
+import { motion } from 'framer-motion';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Train, Github } from 'lucide-react';
+import { Train, Github, RotateCw } from 'lucide-react';
 import axios from 'axios';
 import SeatLayout from './components/SeatLayout';
 import BookingForm from './components/BookingForm';
@@ -10,6 +10,8 @@ import BookingForm from './components/BookingForm';
 const App = () => {
   const [seats, setSeats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     fetchSeats();
@@ -28,6 +30,7 @@ const App = () => {
   };
 
   const handleBooking = async (numSeats) => {
+    setBookingLoading(true);
     try {
       const response = await axios.post('http://localhost:5000/reserve', { seatsRequired: numSeats });
       if (response.data.success) {
@@ -39,10 +42,13 @@ const App = () => {
     } catch (error) {
       console.error('Error booking seats:', error);
       toast.error('Failed to book seats. Please try again.');
+    } finally {
+      setBookingLoading(false);
     }
   };
 
   const handleReset = async () => {
+    setResetLoading(true);
     try {
       const response = await axios.post('http://localhost:5000/reset');
       if (response.data.success) {
@@ -54,6 +60,8 @@ const App = () => {
     } catch (error) {
       console.error('Error resetting seats:', error);
       toast.error('Failed to reset seats. Please try again.');
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -73,15 +81,32 @@ const App = () => {
       </header>
 
       <main className="flex-grow container mx-auto py-8 px-4">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden max-w-2xl mx-auto">
+          <div className="bg-gray-200 p-4 text-center">
+            <h2 className="text-2xl font-bold text-gray-800">Train 12345 - Coach A</h2>
+            <p className="text-gray-600">Total Seats: 80</p>
+          </div>
+          
           <div className="p-8">
-            <BookingForm onBooking={handleBooking} />
-            <button
-              onClick={handleReset}
-              className="mt-4 w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition duration-300"
-            >
-              Reset All Seats
-            </button>
+            <div className="flex justify-end mb-4">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleReset}
+                disabled={resetLoading}
+                className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition duration-300 flex items-center"
+              >
+                {resetLoading ? (
+                  <RotateCw className="animate-spin mr-2" size={18} />
+                ) : (
+                  <RotateCw className="mr-2" size={18} />
+                )}
+                Reset All Seats
+              </motion.button>
+            </div>
+
+            <BookingForm onBooking={handleBooking} isLoading={bookingLoading} />
+            
             {loading ? (
               <div className="mt-8 text-center">Loading seats...</div>
             ) : (
@@ -93,7 +118,7 @@ const App = () => {
 
       <footer className="bg-gray-800 text-white py-4">
         <div className="container mx-auto text-center">
-          <p>&copy; 2023 TrainSeat Booker. All rights reserved.</p>
+          <p>&copy; 2024 TrainSeat Booker. All rights reserved.</p>
         </div>
       </footer>
       
