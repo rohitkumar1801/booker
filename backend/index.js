@@ -183,6 +183,10 @@ app.post("/reserve", async (req, res, next) => {
   }
 });
 
+app.get("/", async(req, res)=>{
+  res.status(200).json({status:"success", message:"Server is running ..."})
+})
+
 // Start the server and initialize seats on startup
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
