@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { Train, Github, RotateCw } from 'lucide-react';
-import axios from 'axios';
-import SeatLayout from './components/SeatLayout';
-import BookingForm from './components/BookingForm';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Train, Github, RotateCw } from "lucide-react";
+import axios from "axios";
+import SeatLayout from "./components/SeatLayout";
+import BookingForm from "./components/BookingForm";
 
 const App = () => {
   const [seats, setSeats] = useState([]);
@@ -21,12 +21,12 @@ const App = () => {
   // Fetch available seats from the server
   const fetchSeats = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/seats');
+      const response = await axios.get(`https://booker-livid.vercel.app/seats`);
       setSeats(response.data);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching seats:', error);
-      toast.error('Failed to fetch seats. Please try again.');
+      console.error("Error fetching seats:", error);
+      toast.error("Failed to fetch seats. Please try again.");
       setLoading(false);
     }
   };
@@ -35,7 +35,10 @@ const App = () => {
   const handleBooking = async (numSeats) => {
     setBookingLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/reserve', { seatsRequired: numSeats });
+      const response = await axios.post(
+        `https://booker-livid.vercel.app/reserve`,
+        { seatsRequired: numSeats }
+      );
       if (response.data.success) {
         toast.success(`Successfully booked ${numSeats} seat(s)!`);
         fetchSeats(); // Refresh seat data after booking
@@ -43,8 +46,8 @@ const App = () => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      console.error('Error booking seats:', error);
-      toast.error('Failed to book seats. Please try again.');
+      console.error("Error booking seats:", error);
+      toast.error("Failed to book seats. Please try again.");
     } finally {
       setBookingLoading(false);
     }
@@ -54,16 +57,18 @@ const App = () => {
   const handleReset = async () => {
     setResetLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/reset');
+      const response = await axios.post(
+        `https://booker-livid.vercel.app/reset`
+      );
       if (response.data.success) {
-        toast.success('All seats have been reset.');
+        toast.success("All seats have been reset.");
         fetchSeats(); // Refresh seat data after reset
       } else {
-        toast.error('Failed to reset seats.');
+        toast.error("Failed to reset seats.");
       }
     } catch (error) {
-      console.error('Error resetting seats:', error);
-      toast.error('Failed to reset seats. Please try again.');
+      console.error("Error resetting seats:", error);
+      toast.error("Failed to reset seats. Please try again.");
     } finally {
       setResetLoading(false);
     }
@@ -78,7 +83,12 @@ const App = () => {
             <Train size={24} />
             <h1 className="text-xl font-bold">TrainSeat Booker</h1>
           </div>
-          <a href="https://github.com/rohitkumar1801/booker" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-gray-200 hover:underline  ">
+          <a
+            href="https://github.com/rohitkumar1801/booker"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-2 hover:text-gray-200 hover:underline  "
+          >
             <Github size={20} />
             <span>View on GitHub</span>
           </a>
@@ -88,10 +98,12 @@ const App = () => {
       <main className="flex-grow container mx-auto py-8 px-4">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden max-w-2xl mx-auto">
           <div className="bg-gray-200 p-4 text-center">
-            <h2 className="text-2xl font-bold text-gray-800">Train 12345 - Coach A</h2>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Train 12345 - Coach A
+            </h2>
             <p className="text-gray-600">Total Seats: 80</p>
           </div>
-          
+
           <div className="p-8">
             {/* Button to reset seat reservations */}
             <div className="flex justify-end mb-4">
@@ -113,7 +125,7 @@ const App = () => {
 
             {/* Booking form to select number of seats */}
             <BookingForm onBooking={handleBooking} isLoading={bookingLoading} />
-            
+
             {/* Display loading state or seat layout */}
             {loading ? (
               <div className="mt-8 text-center">Loading seats...</div>
@@ -130,7 +142,7 @@ const App = () => {
           <p>&copy; 2024 TrainSeat Booker. All rights reserved.</p>
         </div>
       </footer>
-      
+
       {/* Notification container for success and error messages */}
       <ToastContainer position="bottom-right" />
     </div>
