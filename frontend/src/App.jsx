@@ -1,4 +1,4 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,10 +13,12 @@ const App = () => {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
 
+  // Fetch seat data on component mount
   useEffect(() => {
     fetchSeats();
   }, []);
 
+  // Fetch available seats from the server
   const fetchSeats = async () => {
     try {
       const response = await axios.get('http://localhost:5000/seats');
@@ -29,13 +31,14 @@ const App = () => {
     }
   };
 
+  // Handle booking seats by calling the reserve API
   const handleBooking = async (numSeats) => {
     setBookingLoading(true);
     try {
       const response = await axios.post('http://localhost:5000/reserve', { seatsRequired: numSeats });
       if (response.data.success) {
         toast.success(`Successfully booked ${numSeats} seat(s)!`);
-        fetchSeats(); // Refresh seat data
+        fetchSeats(); // Refresh seat data after booking
       } else {
         toast.error(response.data.message);
       }
@@ -47,13 +50,14 @@ const App = () => {
     }
   };
 
+  // Reset all seat bookings via the API
   const handleReset = async () => {
     setResetLoading(true);
     try {
       const response = await axios.post('http://localhost:5000/reset');
       if (response.data.success) {
         toast.success('All seats have been reset.');
-        fetchSeats(); // Refresh seat data
+        fetchSeats(); // Refresh seat data after reset
       } else {
         toast.error('Failed to reset seats.');
       }
@@ -67,13 +71,14 @@ const App = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
+      {/* Header with app title and GitHub link */}
       <header className="bg-cyan-600 text-white p-4">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Train size={24} />
             <h1 className="text-xl font-bold">TrainSeat Booker</h1>
           </div>
-          <a href="https://github.com/yourusername/train-booking-app" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-gray-200">
+          <a href="https://github.com/rohitkumar1801/booker" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 hover:text-gray-200 hover:underline  ">
             <Github size={20} />
             <span>View on GitHub</span>
           </a>
@@ -88,6 +93,7 @@ const App = () => {
           </div>
           
           <div className="p-8">
+            {/* Button to reset seat reservations */}
             <div className="flex justify-end mb-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -105,8 +111,10 @@ const App = () => {
               </motion.button>
             </div>
 
+            {/* Booking form to select number of seats */}
             <BookingForm onBooking={handleBooking} isLoading={bookingLoading} />
             
+            {/* Display loading state or seat layout */}
             {loading ? (
               <div className="mt-8 text-center">Loading seats...</div>
             ) : (
@@ -116,12 +124,14 @@ const App = () => {
         </div>
       </main>
 
+      {/* Footer with copyright info */}
       <footer className="bg-gray-800 text-white py-4">
         <div className="container mx-auto text-center">
           <p>&copy; 2024 TrainSeat Booker. All rights reserved.</p>
         </div>
       </footer>
       
+      {/* Notification container for success and error messages */}
       <ToastContainer position="bottom-right" />
     </div>
   );

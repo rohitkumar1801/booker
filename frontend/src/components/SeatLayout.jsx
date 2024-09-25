@@ -39,14 +39,14 @@ const SeatLayout = ({ seats }) => {
             <User size={16} color="white" />
             
           </div>
-          <span className="text-sm">Available</span>
+          <span className="text-sm font-bold text-gray-500">Available</span>
         </div>
         <div className="flex items-center">
           <div className="w-10 h-10 bg-red-500 rounded-md flex flex-col items-center justify-center mr-2">
             <UserX size={16} color="white" />
             
           </div>
-          <span className="text-sm">Reserved</span>
+          <span className="text-sm font-bold text-gray-500">Reserved</span>
         </div>
       </div>
     </div>
