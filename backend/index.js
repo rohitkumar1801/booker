@@ -10,10 +10,12 @@ dotenv.config();
 const app = express();
 
 // Middleware configuration
-app.use(cors({
-  origin: 'https://booker-front.vercel.app', 
-  credentials: true, 
-}));
+app.use(
+  cors({
+    origin: "https://booker-front.vercel.app",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Connect to MongoDB
@@ -65,9 +67,11 @@ const initializeSeats = async () => {
 
 const findBestAvailableSeats = async (seatsRequired) => {
   try {
-    const availableSeats = await Seat.find({ status: "available" }).sort({ row: 1, number: 1 });
+    const availableSeats = await Seat.find({ status: "available" }).sort({
+      row: 1,
+      number: 1,
+    });
     seatsRequired = parseInt(seatsRequired);
-
     if (isNaN(seatsRequired) || seatsRequired <= 0) {
       throw new Error("Invalid number of seats requested");
     }
@@ -79,33 +83,51 @@ const findBestAvailableSeats = async (seatsRequired) => {
       return acc;
     }, {});
 
-    console.log("RowMap..", rowMap);
-
     // Check for contiguous seats in the same row
     for (const row in rowMap) {
       const seatsInRow = rowMap[row];
       for (let i = 0; i <= seatsInRow.length - seatsRequired; i++) {
         const contiguousSeats = seatsInRow.slice(i, i + seatsRequired);
-        if (contiguousSeats.length === seatsRequired) {
+        if (
+          contiguousSeats.length === seatsRequired &&
+          contiguousSeats.every(
+            (seat, index) =>
+              index === 0 ||
+              seat.number === contiguousSeats[index - 1].number + 1
+          )
+        ) {
           return contiguousSeats;
         }
       }
     }
 
     // Check for nearby seats across adjacent rows
-    const rows = Object.keys(rowMap).map(Number).sort((a, b) => a - b);
+    const rows = Object.keys(rowMap)
+      .map(Number)
+      .sort((a, b) => a - b);
     for (let i = 0; i < rows.length; i++) {
-      const currentRow = rows[i];
-      const previousRow = rows[i - 1];
-      const nextRow = rows[i + 1];
-
       let nearbySeats = [];
-      nearbySeats.push(...(rowMap[currentRow] || []));
-      nearbySeats.push(...(rowMap[previousRow] || []));
-      nearbySeats.push(...(rowMap[nextRow] || []));
+      let rowsToCheck = [rows[i]]; // Start with the current row
 
-      if (nearbySeats.length >= seatsRequired) {
-        return nearbySeats.slice(0, seatsRequired);
+      // Add adjacent rows
+      if (i > 0) rowsToCheck.push(rows[i - 1]);
+      if (i < rows.length - 1) rowsToCheck.push(rows[i + 1]);
+
+      // Sort rows to check to ensure we're looking at the closest rows first
+      rowsToCheck.sort((a, b) => Math.abs(a - rows[i]) - Math.abs(b - rows[i]));
+
+      for (const rowToCheck of rowsToCheck) {
+        nearbySeats.push(...rowMap[rowToCheck]);
+        if (nearbySeats.length >= seatsRequired) {
+          // Sort seats by proximity to the starting row and seat number
+          nearbySeats.sort((a, b) => {
+            const rowDiffA = Math.abs(a.row - rows[i]);
+            const rowDiffB = Math.abs(b.row - rows[i]);
+            if (rowDiffA !== rowDiffB) return rowDiffA - rowDiffB;
+            return a.number - b.number;
+          });
+          return nearbySeats.slice(0, seatsRequired);
+        }
       }
     }
 
@@ -185,9 +207,9 @@ app.post("/reserve", async (req, res, next) => {
   }
 });
 
-app.get("/", async(req, res)=>{
-  res.status(200).json({status:"success", message:"Server is running ..."})
-})
+app.get("/", async (req, res) => {
+  res.status(200).json({ status: "success", message: "Server is running ..." });
+});
 
 // Start the server and initialize seats on startup
 const PORT = process.env.PORT || 8080;
