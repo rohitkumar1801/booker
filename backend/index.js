@@ -12,7 +12,7 @@ const app = express();
 // Middleware configuration
 app.use(
   cors({
-    origin: "https://booker-front.vercel.app",
+    origin: ["https://booker-front.vercel.app", "http://localhost:5173"],
     credentials: true,
   })
 );
