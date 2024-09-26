@@ -79,6 +79,8 @@ const findBestAvailableSeats = async (seatsRequired) => {
       return acc;
     }, {});
 
+    console.log("RowMap..", rowMap);
+
     // Check for contiguous seats in the same row
     for (const row in rowMap) {
       const seatsInRow = rowMap[row];
