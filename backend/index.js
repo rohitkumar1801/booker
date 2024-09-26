@@ -11,7 +11,7 @@ const app = express();
 
 // Middleware configuration
 app.use(cors({
-  origin: 'http://localhost:5173', 
+  origin: process.env.FRONTEND_URL, 
   credentials: true, 
 }));
 app.use(express.json());
@@ -188,7 +188,7 @@ app.get("/", async(req, res)=>{
 })
 
 // Start the server and initialize seats on startup
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
   await initializeSeats();
